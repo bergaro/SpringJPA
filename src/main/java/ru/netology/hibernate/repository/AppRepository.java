@@ -31,12 +31,12 @@ public class AppRepository {
 
     public List<Person> getPersonByCity(String city) {
         initPersonsTable(); //Only Test
-        return personRepository.findByCityOfLiving(city);
+        return personRepository.findByCity(city);
     }
 
     public List<Person> getPersonWhoseAgeLessThan(int age) {
         initPersonsTable(); //Only Test
-        return personRepository.findByAgeLessThanOrderByAgeDesc(age);
+        return personRepository.findByAgeLessThan(age);
     }
 
     public Person getPersonByNameAndSurname(String name, String surname) {

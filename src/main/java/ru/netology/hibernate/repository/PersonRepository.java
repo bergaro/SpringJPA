@@ -1,6 +1,8 @@
 package ru.netology.hibernate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.netology.hibernate.repository.PersonEntity.Person;
 
 import java.util.List;
@@ -8,7 +10,13 @@ import java.util.Optional;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-    List<Person> findByCityOfLiving(String city);
-    List<Person> findByAgeLessThanOrderByAgeDesc(Integer Age);
-    Optional<Person> findByNameAndSurname(String name, String surname);
+    @Query("select p from persons p where p.cityOfLiving = :city")
+    List<Person> findByCity(@Param("city") String city);
+
+    @Query("select p from persons p where p.age < :age order by p.age desc")
+    List<Person> findByAgeLessThan(@Param("age") Integer age);
+
+    @Query("select p from persons p where p.name = :name and p.surname = :surname")
+    Optional<Person> findByNameAndSurname(@Param("name") String name,
+                                          @Param("surname") String surname);
 }
