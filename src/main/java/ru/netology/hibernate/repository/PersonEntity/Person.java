@@ -14,8 +14,18 @@ import javax.persistence.*;
 @Entity(name = "persons")
 public class Person {
 
-    @EmbeddedId
-    private PersonPK personPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long personId;
+
+    @Column(length = 25)
+    private String name;
+
+    @Column(length = 25)
+    private String surname;
+
+    @Column
+    private int age;
 
     @Column(name = "phone_number", length = 25)
     private String phoneNumber;

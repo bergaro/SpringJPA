@@ -3,12 +3,7 @@ package ru.netology.hibernate.repository;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.netology.hibernate.repository.PersonEntity.Person;
-import ru.netology.hibernate.repository.PersonEntity.PersonPK;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.*;
 
 @Data
@@ -16,63 +11,66 @@ import java.util.*;
 @Repository
 public class AppRepository {
 
-    private EntityManager entityManager;
+    private final PersonRepository personRepository;
 
-    @PersistenceContext
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    @Transactional
-    public List<Person> personTrans(String city) {
-        initPersonsTable();
-        return getPersonByCity(city);
+    public AppRepository(PersonRepository personRepository) {
+        this.personRepository = personRepository;
     }
 
     protected void initPersonsTable() {
-        Query query = entityManager.createQuery("select p from persons p" +
-                " where p.personPK = :personPK");
+        String name;
+        String surname;
         for(Person person : getPersonList()) {
-            query.setParameter("personPK", person.getPersonPK());
-            if(query.getResultList().isEmpty()) {
-                entityManager.persist(person);
+            name = person.getName();
+            surname = person.getSurname();
+            if(personRepository.findByNameAndSurname(name, surname).isEmpty()) {
+                personRepository.save(person);
             }
         }
     }
 
-    protected List<Person> getPersonByCity(String city) {
-        Query query = entityManager.createQuery("select p from persons p " +
-                "where p.cityOfLiving = :city");
-        query.setParameter("city", city);
-        return query.getResultList();
+    public List<Person> getPersonByCity(String city) {
+        initPersonsTable(); //Only Test
+        return personRepository.findByCityOfLiving(city);
+    }
+
+    public List<Person> getPersonWhoseAgeLessThan(int age) {
+        initPersonsTable(); //Only Test
+        return personRepository.findByAgeLessThanOrderByAgeDesc(age);
+    }
+
+    public Person getPersonByNameAndSurname(String name, String surname) {
+        initPersonsTable(); //Only Test
+        Person person;
+        try {
+            person = personRepository.findByNameAndSurname(name, surname).get();
+        } catch (NoSuchElementException ex) {
+            person = null;
+            System.out.println("Person obj: No value present in database");
+        }
+        return person;
     }
 
     private List<Person> getPersonList() {
         List<Person> personList = new ArrayList<>();
         personList.add(Person.builder()
-                .personPK(PersonPK.builder()
-                        .name("Alexey")
-                        .surname("Ivanov")
-                        .age(22)
-                        .build())
+                .name("Alexey")
+                .surname("Ivanov")
+                .age(25)
                 .cityOfLiving("Moscow")
                 .phoneNumber("1234567")
                 .build());
         personList.add(Person.builder()
-                .personPK(PersonPK.builder()
-                        .name("Ivan")
-                        .surname("Petrov")
-                        .age(28)
-                        .build())
+                .name("Ivan")
+                .surname("Petrov")
+                .age(28)
                 .cityOfLiving("St.Peterburg")
                 .phoneNumber("1234567")
                 .build());
         personList.add(Person.builder()
-                .personPK(PersonPK.builder()
-                        .name("Petr")
-                        .surname("Petrov")
-                        .age(34)
-                        .build())
+                .name("Petr")
+                .surname("Petrov")
+                .age(34)
                 .cityOfLiving("Sochi")
                 .phoneNumber("1234567")
                 .build());
